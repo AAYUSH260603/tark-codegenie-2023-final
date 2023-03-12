@@ -1,4 +1,4 @@
-//WORK IN PROGRESS
+//work in progress
 
 import java.util.*;
 
@@ -9,7 +9,7 @@ class Train {
     ArrayList<String> trainCoaches;
     int distance;
     HashMap<Character, Integer> map;
-    HashMap<String, HashMap<Character, Integer>> dateMap=new HashMap<String, HashMap<Character, Integer>>();
+    HashMap<String, HashMap<Character, Integer>> dateMap = new HashMap<String, HashMap<Character, Integer>>();
     String date;
 
     Train(int trainNumber, String sourcePlace, String destinatonPlace, String coach, int distance) {
@@ -17,15 +17,11 @@ class Train {
         this.sourcePlace = sourcePlace;
         this.destinationPlace = destinatonPlace;
         String[] coaches = coach.split(" ");
-        for (int i = 0; i < coaches.length; i++) {
-            System.out.println(coaches[i]);
-        }
-
+    
         trainCoaches = new ArrayList<>();
         for (int i = 1; i < coaches.length; i++) {
             trainCoaches.add(coaches[i].substring(0, 2));
         }
-
         map = new HashMap<>();
         this.distance = distance;
         for (int i = 1; i < coaches.length; i++) {
@@ -38,12 +34,14 @@ class Train {
                 map.put(coaches[i].charAt(0), Integer.parseInt(coaches[i].substring(3)));
             }
         }
-        System.out.println(map);
+        // System.out.println(map);
     }
 
 };
 
 class trainBooking {
+    int flag = 0;
+
     public int checkAvailability(String userInput, int numberOfTrains, Train[] train) {
         String[] input = userInput.split(" ");
 
@@ -51,18 +49,23 @@ class trainBooking {
 
             String[] src = train[i].sourcePlace.split("-");
             String[] des = train[i].destinationPlace.split("-");
-            if (src[0].equals(input[0]) && des[0].equals(input[1])
-                    && checkSeats(train[i], input[2], input[3], Integer.parseInt(input[4]))) {
-                if (input[3].equals("SL")) {
-                    return (Integer.parseInt(input[4])) * train[i].distance;
-                } else if (input[3].equals("3A")) {
-                    return 2 * (Integer.parseInt(input[4])) * train[i].distance;
-                } else if (input[3].equals("2A")) {
-                    return 3 * (Integer.parseInt(input[4])) * train[i].distance;
-                } else if (input[3].equals("1A")) {
-                    return 4 * (Integer.parseInt(input[4])) * train[i].distance;
+            if (src[0].equals(input[0]) && des[0].equals(input[1])) {
+                flag = 1;
+                if (checkSeats(train[i], input[2], input[3], Integer.parseInt(input[4]))) {
+                    if (input[3].equals("SL")) {
+                        return (Integer.parseInt(input[4])) * train[i].distance;
+                    } else if (input[3].equals("3A")) {
+                        return 2 * (Integer.parseInt(input[4])) * train[i].distance;
+                    } else if (input[3].equals("2A")) {
+                        return 3 * (Integer.parseInt(input[4])) * train[i].distance;
+                    } else if (input[3].equals("1H")) {
+                        return 4 * (Integer.parseInt(input[4])) * train[i].distance;
+                    }
                 }
             }
+        }
+        if (flag != 1) {
+            return 0;
         }
         return -1;
     }
@@ -75,12 +78,23 @@ class trainBooking {
         }
 
         for (int i = 0; i < train.trainCoaches.size(); i++) {
-            char coach = train.trainCoaches.get(i).charAt(0);
-            System.out.println(coach);
-            if (coach == (category.charAt(0)) && train.dateMap.get(date).get(coach) > number) {
-                //train.map.put(coach, train.map.get(coach) - number);
-                train.dateMap.get(date).put(coach,train.dateMap.get(date).get(coach)-number );
-                return true;
+            char coach;
+            if (train.trainCoaches.get(i).charAt(0) == 'S') {
+                coach = 'S';
+            } else {
+                coach = train.trainCoaches.get(i).charAt(1);
+            }
+            //System.out.println(train.dateMap.get(date).get(coach));
+            if (train.dateMap.get(date).get(coach) == null) {
+
+               return false;
+            }
+            else{
+                 if (coach == (category.charAt(0)) && train.dateMap.get(date).get(coach) > number) {
+                    // train.map.put(coach, train.map.get(coach) - number);
+                    train.dateMap.get(date).put(coach, train.dateMap.get(date).get(coach) - number);
+                    return true;
+                }
             }
         }
         return false;
@@ -119,6 +133,8 @@ public class tarkFinal {
             int cost = t.checkAvailability(userInput, numberOfTrains, train);
             if (cost == -1) {
                 System.out.println("no seats available");
+            } else if (cost == 0) {
+                System.out.println("No Trains Available");
             } else {
                 System.out.println(pnr + " " + cost);
                 pnr++;
