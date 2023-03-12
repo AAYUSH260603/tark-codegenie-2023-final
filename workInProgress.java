@@ -9,6 +9,7 @@ class Train {
     ArrayList<String> trainCoaches;
     int distance;
     HashMap<Character, Integer> map;
+    HashMap<String, HashMap<Character, Integer>> dateMap=new HashMap<String, HashMap<Character, Integer>>();
     String date;
 
     Train(int trainNumber, String sourcePlace, String destinatonPlace, String coach, int distance) {
@@ -24,7 +25,7 @@ class Train {
         for (int i = 1; i < coaches.length; i++) {
             trainCoaches.add(coaches[i].substring(0, 2));
         }
-       
+
         map = new HashMap<>();
         this.distance = distance;
         for (int i = 1; i < coaches.length; i++) {
@@ -45,7 +46,9 @@ class Train {
 class trainBooking {
     public int checkAvailability(String userInput, int numberOfTrains, Train[] train) {
         String[] input = userInput.split(" ");
+
         for (int i = 0; i < numberOfTrains; i++) {
+
             String[] src = train[i].sourcePlace.split("-");
             String[] des = train[i].destinationPlace.split("-");
             if (src[0].equals(input[0]) && des[0].equals(input[1])
@@ -66,11 +69,17 @@ class trainBooking {
 
     public boolean checkSeats(Train train, String date, String category, int number) {
 
+        if (!train.dateMap.containsKey(date)) {
+
+            train.dateMap.put(date, train.map);
+        }
+
         for (int i = 0; i < train.trainCoaches.size(); i++) {
             char coach = train.trainCoaches.get(i).charAt(0);
             System.out.println(coach);
-            if (coach == (category.charAt(0)) && train.map.get(coach) > number) {
-                train.map.put(coach, train.map.get(coach) - number);
+            if (coach == (category.charAt(0)) && train.dateMap.get(date).get(coach) > number) {
+                //train.map.put(coach, train.map.get(coach) - number);
+                train.dateMap.get(date).put(coach,train.dateMap.get(date).get(coach)-number );
                 return true;
             }
         }
